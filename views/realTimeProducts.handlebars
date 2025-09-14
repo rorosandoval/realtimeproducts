@@ -1,0 +1,35 @@
+<h1>Administrar Productos</h1>
+<div class="contenedor-formulario">
+  <form id="productForm">
+    <input type="text" id="title" placeholder="Título" required />
+    <textarea type="text" id="description" placeholder="Descripción" required ></textarea>
+    <input type="number" id="price" placeholder="Precio" required />
+    <input type="text" id="code" placeholder="Código" required />
+    <input type="text" id="category" placeholder="Categoría" required />
+    <input type="number" id="stock" placeholder="Stock" required />
+    <input type="text" id="thumbnails" placeholder="Thumbnails" />
+    <button type="submit" class="boton-agregar">Agregar Producto</button>
+  </form>
+</div>
+
+<div class="seccion-productos">
+  <div id="productsList" class="contenedor-productos">
+    {{#each products}}
+      <div class="producto">
+        <h3>{{title}}</h3>
+        <p>{{description}}</p>
+        <p>Precio: ${{price}}</p>
+        <p>Stock: {{stock}}</p>
+        <p>Código: {{code}}</p>
+        <p>Categoría: {{category}}</p>
+        <p>Thumbnails: {{thumbnails}}</p>
+        <button
+          class="boton-elminar"
+          onclick="deleteProduct({{id}})"
+        >Eliminar</button>
+      </div>
+    {{/each}}
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realTimeProducts.js"></script>
