@@ -14,7 +14,7 @@ Proyecto de gestión de productos y carritos con Express, Handlebars y Socket.io
 1. Clona el repositorio:
 
    ```sh
-   git clone <URL-del-repositorio>
+   git clone https://github.com/rorosandoval/realtimeproducts.git
    cd entrega-2
    ```
 
