@@ -1,0 +1,89 @@
+<div class="products-container">
+  <h1>Catálogo de Productos</h1>
+  
+  <div class="filters-section">
+    <form class="filters-form" method="GET" action="/products">
+      <div class="filter-group">
+        <label for="query">Buscar:</label>
+        <input type="text" id="query" name="query" value="{{query.query}}" placeholder="Título o descripción">
+      </div>
+      
+      <div class="filter-group">
+        <label for="category">Categoría:</label>
+        <select id="category" name="category">
+          <option value="">Todas las categorías</option>
+          <option value="Electrónica" {{#if (eq query.category 'Electrónica')}}selected{{/if}}>Electrónicos</option>
+          <option value="Deportes" {{#if (eq query.category 'Deportes')}}selected{{/if}}>Deportes</option>
+          <option value="Libros y Papelería" {{#if (eq query.category 'Libros y Papelería')}}selected{{/if}}>Libros y Papelería</option>
+          <option value="Hogar y Cocina" {{#if (eq query.category 'Hogar y Cocina')}}selected{{/if}}>Hogar y Cocina</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="sort">Ordenar por precio:</label>
+        <select id="sort" name="sort">
+          <option value="">Sin ordenar</option>
+          <option value="asc" {{#if (eq query.sort 'asc')}}selected{{/if}}>Menor a mayor</option>
+          <option value="desc" {{#if (eq query.sort 'desc')}}selected{{/if}}>Mayor a menor</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="limit">Productos por página:</label>
+        <select id="limit" name="limit">
+          <option value="5" {{#if (eq query.limit '5')}}selected{{/if}}>5</option>
+          <option value="10" {{#if (eq query.limit '10')}}selected{{/if}}>10</option>
+          <option value="20" {{#if (eq query.limit '20')}}selected{{/if}}>20</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn-filter">Aplicar Filtros</button>
+      <a href="/products" class="btn-clear">Limpiar Filtros</a>
+    </form>
+  </div>
+
+  <div class="products-grid">
+    {{#each products}}
+    <div class="product-card">
+      <div class="product-info">
+        <h3>{{this.title}}</h3>
+        <p class="product-description">{{this.description}}</p>
+        <p class="product-price">${{this.price}}</p>
+        <p class="product-stock">Stock: {{this.stock}}</p>
+        <p class="product-category">Categoría: {{this.category}}</p>
+        {{#if this.thumbnails.length}}
+          <div class="product-thumbnails">
+            {{#each this.thumbnails}}
+              <img src="{{this}}" alt="Thumbnail" class="thumbnail">
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+      <div class="product-actions">
+        <a href="/products/{{this._id}}" class="btn-detail">Ver Detalles</a>
+        <button onclick="addToCart('{{this._id}}')" class="btn-add-cart">Agregar al Carrito</button>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+
+  {{#if pagination}}
+  <div class="pagination">
+    {{#if pagination.hasPrevPage}}
+      <a href="?page={{pagination.prevPage}}&limit={{query.limit}}&sort={{query.sort}}&query={{query.query}}&category={{query.category}}" 
+         class="btn-page">‹ Anterior</a>
+    {{/if}}
+    
+    <span class="page-info">
+      Página {{pagination.page}} de {{pagination.totalPages}}
+    </span>
+    
+    {{#if pagination.hasNextPage}}
+      <a href="?page={{pagination.nextPage}}&limit={{query.limit}}&sort={{query.sort}}&query={{query.query}}&category={{query.category}}" 
+         class="btn-page">Siguiente ›</a>
+    {{/if}}
+  </div>
+  {{/if}}
+</div>
+
+<script src="/js/productsHandlebars.js"></script>

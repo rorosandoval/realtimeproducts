@@ -1,35 +1,142 @@
-<h1>Administrar Productos</h1>
-<div class="contenedor-formulario">
-  <form id="productForm">
-    <input type="text" id="title" placeholder="Título" required />
-    <textarea type="text" id="description" placeholder="Descripción" required ></textarea>
-    <input type="number" id="price" placeholder="Precio" required />
-    <input type="text" id="code" placeholder="Código" required />
-    <input type="text" id="category" placeholder="Categoría" required />
-    <input type="number" id="stock" placeholder="Stock" required />
-    <input type="text" id="thumbnails" placeholder="Thumbnails" />
-    <button type="submit" class="boton-agregar">Agregar Producto</button>
-  </form>
-</div>
+<div class="products-container">
+  <h1>Administrar Productos</h1>
 
-<div class="seccion-productos">
-  <div id="productsList" class="contenedor-productos">
+  <div class="contenedor-formulario">
+    <form id="productForm">
+      <div class="filter-group">
+        <label for="title">Título:</label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          placeholder="Título del producto"
+          required
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="description">Descripción:</label>
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Descripción del producto"
+          required
+        ></textarea>
+      </div>
+
+      <div class="filter-group">
+        <label for="price">Precio:</label>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          placeholder="0.00"
+          step="0.01"
+          min="0"
+          required
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="code">Código:</label>
+        <input
+          type="text"
+          id="code"
+          name="code"
+          placeholder="Código único"
+          required
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="category">Categoría:</label>
+        <select id="category" name="category" required>
+          <option value="">Seleccionar categoría</option>
+          <option value="Electrónica">Electrónicos</option>
+          <option value="Deportes">Deportes</option>
+          <option value="Libros y Papelería">Libros y Papelería</option>
+          <option value="Hogar y Cocina">Hogar y Cocina</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="stock">Stock:</label>
+        <input
+          type="number"
+          id="stock"
+          name="stock"
+          placeholder="0"
+          min="0"
+          required
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="thumbnails">Imágenes:</label>
+        <input
+          type="text"
+          id="thumbnails"
+          name="thumbnails"
+          placeholder="URL de la imagen"
+        />
+      </div>
+
+      <button type="submit" class="btn-filter">Agregar Producto</button>
+    </form>
+  </div>
+
+  <div class="products-grid" id="productsList">
     {{#each products}}
-      <div class="producto">
-        <h3>{{title}}</h3>
-        <p>{{description}}</p>
-        <p>Precio: ${{price}}</p>
-        <p>Stock: {{stock}}</p>
-        <p>Código: {{code}}</p>
-        <p>Categoría: {{category}}</p>
-        <p>Thumbnails: {{thumbnails}}</p>
-        <button
-          class="boton-elminar"
-          onclick="deleteProduct({{id}})"
-        >Eliminar</button>
+      <div class="product-card">
+        <div class="product-info">
+          <h3>{{this.title}}</h3>
+          <p class="product-description">{{this.description}}</p>
+          <p class="product-price">${{this.price}}</p>
+          <p class="product-stock">Stock: {{this.stock}}</p>
+          <p class="product-category">Categoría: {{this.category}}</p>
+          {{#if this.thumbnails.length}}
+            <div class="product-thumbnails">
+              {{#each this.thumbnails}}
+                <img src="{{this}}" alt="Thumbnail" class="thumbnail" />
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+        <div class="product-actions">
+          <button onclick="deleteProduct('{{this._id}}')" class="btn-clear">
+            Eliminar
+          </button>
+        </div>
       </div>
     {{/each}}
   </div>
+
+  {{#if pagination}}
+    <div class="pagination">
+      {{#if pagination.hasPrevPage}}
+        <a
+          href="?page={{pagination.prevPage}}&limit={{query.limit}}&sort={{query.sort}}&query={{query.query}}&category={{query.category}}"
+          class="btn-page"
+        >‹ Anterior</a>
+      {{/if}}
+
+      <span class="page-info">
+        Página
+        {{pagination.page}}
+        de
+        {{pagination.totalPages}}
+      </span>
+
+      {{#if pagination.hasNextPage}}
+        <a
+          href="?page={{pagination.nextPage}}&limit={{query.limit}}&sort={{query.sort}}&query={{query.query}}&category={{query.category}}"
+          class="btn-page"
+        >Siguiente ›</a>
+      {{/if}}
+    </div>
+  {{/if}}
+
 </div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/realTimeProducts.js"></script>

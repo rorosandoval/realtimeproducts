@@ -1,0 +1,113 @@
+<div class="product-detail-container">
+  <div class="breadcrumb">
+    <a href="/products">← Volver a productos</a>
+  </div>
+
+  <div class="product-detail">
+    <div class="product-images">
+      {{#if product.thumbnails.length}}
+        <div class="main-image">
+          <img
+            src="{{product.thumbnails.[0]}}"
+            alt="{{product.title}}"
+            id="mainImage"
+          />
+        </div>
+        {{#if (gt product.thumbnails.length 1)}}
+          <div class="thumbnail-list">
+            {{#each product.thumbnails}}
+              <img
+                src="{{this}}"
+                alt="Thumbnail"
+                class="thumbnail-small"
+                onclick="changeMainImage('{{this}}')"
+              />
+            {{/each}}
+          </div>
+        {{/if}}
+      {{else}}
+        <div class="no-image">
+          <p>Sin imagen disponible</p>
+        </div>
+      {{/if}}
+    </div>
+
+    <div class="product-info-detail">
+      <h1>{{product.title}}</h1>
+      <p class="product-code">Código: {{product.code}}</p>
+      <p class="product-category">Categoría: {{product.category}}</p>
+
+      <div class="product-description">
+        <h3>Descripción</h3>
+        <p>{{product.description}}</p>
+      </div>
+
+      <div class="product-pricing">
+        <div class="price">${{product.price}}</div>
+        <div class="stock">
+          {{#if (gt product.stock 0)}}
+            <span class="in-stock">En stock: {{product.stock}} unidades</span>
+          {{else}}
+            <span class="out-of-stock">Agotado</span>
+          {{/if}}
+        </div>
+      </div>
+
+      {{#if product.status}}
+        {{#if (gt product.stock 0)}}
+          <div class="add-to-cart-section">
+            <div class="quantity-selector">
+              <label for="quantity">Cantidad:</label>
+              <input
+                type="number"
+                id="quantity"
+                min="1"
+                max="{{product.stock}}"
+                value="1"
+              />
+            </div>
+            <button
+              onclick="addToCartWithQuantity('{{product._id}}')"
+              class="btn-add-cart-large"
+            >
+              Agregar al Carrito
+            </button>
+          </div>
+        {{else}}
+          <button class="btn-disabled" disabled>Producto Agotado</button>
+        {{/if}}
+      {{else}}
+        <button class="btn-disabled" disabled>Producto No Disponible</button>
+      {{/if}}
+
+      <div class="product-actions">
+        <a href="/products" class="btn-secondary">Seguir Comprando</a>
+        <a href="#" onclick="redirectToCart()" class="btn-secondary">Ver Carrito</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="product-specs">
+    <h3>Especificaciones</h3>
+    <table>
+      <tr>
+        <td>Código</td>
+        <td>{{product.code}}</td>
+      </tr>
+      <tr>
+        <td>Categoría</td>
+        <td>{{product.category}}</td>
+      </tr>
+      <tr>
+        <td>Stock disponible</td>
+        <td>{{product.stock}}</td>
+      </tr>
+      <tr>
+        <td>Estado</td>
+        <td>{{#if product.status}}Activo{{else}}Inactivo{{/if}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script src="/js/productDetail.js"></script>

@@ -1,32 +1,51 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
 const ProductManager = require("../managers/ProductManager.js");
-const filePath = path.join(__dirname, "../data/products.json");
-const productManager = new ProductManager(filePath);
+
+const productManager = new ProductManager();
 
 router.get("/", async (req, res) => {
   try {
-    const products = await productManager.getProducts();
-    res.status(200).json(products);
+    const { limit, page, sort, query, category, status } = req.query;
+
+    const options = {};
+    if (limit) options.limit = limit;
+    if (page) options.page = page;
+    if (sort) options.sort = sort;
+    if (query) options.query = query;
+    if (category) options.category = category;
+    if (status !== undefined) options.status = status === "true";
+
+    const result = await productManager.getProducts(options);
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Error interno" });
+    res.status(500).json({
+      status: "error",
+      error: "Error interno del servidor",
+    });
   }
 });
 
 router.get("/:pid", async (req, res) => {
   try {
-    const pid = parseInt(req.params.pid);
+    const { pid } = req.params;
     const product = await productManager.getProductById(pid);
+
     if (product) {
-      res.status(200).json(product);
+      res.status(200).json({ status: "success", payload: product });
     } else {
-      res.status(404).json({ error: "Producto no encontrado" });
+      res.status(404).json({
+        status: "error",
+        error: "Producto no encontrado",
+      });
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Error interno" });
+    res.status(500).json({
+      status: "error",
+      error: "Error interno del servidor",
+    });
   }
 });
 
@@ -38,62 +57,77 @@ router.post("/", async (req, res) => {
     !title ||
     !description ||
     !price ||
-    !thumbnails ||
     !code ||
     !category ||
-    !stock
+    stock === undefined
   ) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
+    return res.status(400).json({
+      status: "error",
+      error: "Faltan campos obligatorios",
+    });
   }
 
   try {
     const newProduct = await productManager.addProduct({
       title,
       description,
-      price,
-      thumbnails,
+      price: Number(price),
+      thumbnails: thumbnails || [],
       code,
       category,
-      stock,
+      stock: Number(stock),
     });
 
     const { io } = require("../../app.js");
     const products = await productManager.getProducts();
-    io.emit("updateProducts", products);
+    io.emit("updateProducts", products.payload);
 
-    res.status(201).json(newProduct);
+    res.status(201).json({
+      status: "success",
+      payload: newProduct,
+    });
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Error interno" });
+    if (error.code === 11000) {
+      res.status(400).json({
+        status: "error",
+        error: "El código del producto ya existe",
+      });
+    } else {
+      res.status(500).json({
+        status: "error",
+        error: "Error interno del servidor",
+      });
+    }
   }
 });
 
 router.put("/:pid", async (req, res) => {
   const { pid } = req.params;
-  const { title, description, price, thumbnails, code, category, stock } =
-    req.body;
+  const updateData = req.body;
+
+  delete updateData._id;
 
   try {
-    const products = await productManager.getProducts();
-    const product = products.find((p) => p.id === parseInt(pid));
+    const updatedProduct = await productManager.updateProduct(pid, updateData);
 
-    if (!product) {
-      return res.status(404).json({ error: "Producto no encontrado" });
+    if (!updatedProduct) {
+      return res.status(404).json({
+        status: "error",
+        error: "Producto no encontrado",
+      });
     }
 
-    product.title = title || product.title;
-    product.description = description || product.description;
-    product.price = price || product.price;
-    product.thumbnails = thumbnails || product.thumbnails;
-    product.code = code || product.code;
-    product.category = category || product.category;
-    product.stock = stock || product.stock;
-
-    await productManager.saveProducts(products);
-    res.status(200).json(product);
+    res.status(200).json({
+      status: "success",
+      payload: updatedProduct,
+    });
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Error interno" });
+    res.status(500).json({
+      status: "error",
+      error: "Error interno del servidor",
+    });
   }
 });
 
@@ -101,17 +135,29 @@ router.delete("/:pid", async (req, res) => {
   const { pid } = req.params;
 
   try {
-    const products = await productManager.getProducts();
-    const filteredProducts = products.filter((p) => p.id !== parseInt(pid));
-    await productManager.saveProducts(filteredProducts);
+    const deletedProduct = await productManager.deleteProduct(pid);
+
+    if (!deletedProduct) {
+      return res.status(404).json({
+        status: "error",
+        error: "Producto no encontrado",
+      });
+    }
 
     const { io } = require("../../app.js");
-    io.emit("updateProducts", filteredProducts);
+    const products = await productManager.getProducts();
+    io.emit("updateProducts", products.payload);
 
-    res.status(200).json({ message: "Producto eliminado correctamente" });
+    res.status(200).json({
+      status: "success",
+      message: "Producto eliminado correctamente",
+    });
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Error interno" });
+    res.status(500).json({
+      status: "error",
+      error: "Error interno del servidor",
+    });
   }
 });
 

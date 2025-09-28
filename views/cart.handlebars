@@ -1,0 +1,93 @@
+<div class="cart-container">
+  <div class="breadcrumb">
+    <a href="/products">← Seguir comprando</a>
+  </div>
+
+  <h1>Mi Carrito</h1>
+
+{{#if cart.products.length}}
+  <div class="cart-content">
+    <div class="cart-items">
+      {{#each cart.products}}
+      <div class="cart-item" data-product-id="{{this.product._id}}">
+        <div class="item-image">
+          {{#if this.product.thumbnails.length}}
+            <img src="{{this.product.thumbnails.[0]}}" alt="{{this.product.title}}">
+          {{else}}
+            <div class="no-image">Sin imagen</div>
+          {{/if}}
+        </div>
+
+        <div class="item-details">
+          <h3>{{this.product.title}}</h3>
+          <p class="item-description">{{this.product.description}}</p>
+          <p class="item-code">Código: {{this.product.code}}</p>
+          <p class="item-category">Categoría: {{this.product.category}}</p>
+        </div>
+
+        <div class="item-quantity">
+          <label>Cantidad:</label>
+          <div class="quantity-controls">
+            <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', {{this.quantity}}, -1)" 
+                    class="btn-quantity">-</button>
+            <input type="number" 
+                   value="{{this.quantity}}" 
+                   min="1" 
+                   max="{{this.product.stock}}"
+                   onchange="updateQuantityDirect('{{../cartId}}', '{{this.product._id}}', this.value)"
+                   class="quantity-input">
+            <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', {{this.quantity}}, 1)" 
+                    class="btn-quantity"
+                    {{#if
+ (gte this.quantity this.product.stock)}}disabled{{/if}}>+</button>
+          </div>
+          <small>Stock disponible: {{this.product.stock}}</small>
+        </div>
+
+        <div class="item-price">
+          <p class="unit-price">${{this.product.price}} c/u</p>
+          <p class="total-price">${{multiply this.product.price this.quantity}}</p>
+        </div>
+
+        <div class="item-actions">
+          <button onclick="removeFromCart('{{../cartId}}', '{{this.product._id}}')" 
+                  class="btn-remove">
+            Eliminar
+          </button>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-card">
+        <h3>Resumen del pedido</h3>
+        <div class="summary-line">
+          <span>Subtotal:</span>
+          <span id="subtotal">${{total}}</span>
+        </div>
+        <div class="summary-line">
+          <span>Envío:</span>
+          <span>Gratis</span>
+        </div>
+        <div class="summary-line total-line">
+          <span>Total:</span>
+          <span id="total">${{total}}</span>
+        </div>
+        <button class="btn-add-cart-large">Proceder al pago</button>
+        <button onclick="clearCart('{{cartId}}')" class="btn-clear">
+          Vaciar carrito
+        </button>
+      </div>
+    </div>
+  </div>
+  {{else}}
+  <div class="empty-cart">
+    <h2>Tu carrito está vacío</h2>
+    <p>¡Agrega algunos productos para comenzar!</p>
+    <a href="/products" class="btn-primary">Ir a comprar</a>
+  </div>
+  {{/if}}
+</div>
+
+<script src="/js/cartHandlebars.js"></script>
